@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        vul hier recipes arraylist
+//        vul hier recipes arraylist met for-loop
 
         recipeSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         recipeViewPager = (ViewPager) findViewById(R.id.container);
