@@ -1,114 +1,131 @@
 package yazzyyas.w6_recipeapp;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import yazzyyas.w6_recipeapp.models.Recipe;
+import yazzyyas.w6_recipeapp.models.Recipes;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final List<Recipe> recipes = new ArrayList<>();
-    private SectionsPagerAdapter recipeSectionsPagerAdapter;
-    private ViewPager recipeViewPager;
+	private static final List<Recipe> recipes = new ArrayList<>();
+	private SectionsPagerAdapter recipeSectionsPagerAdapter;
+	private ViewPager recipeViewPager;
 
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+		requestData();
 
-//        vul hier recipes arraylist met for-loop
+		recipeSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), recipes);
+		recipeViewPager = findViewById(R.id.container);
+		recipeViewPager.setAdapter(recipeSectionsPagerAdapter);
+	}
 
-        recipeSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        recipeViewPager = (ViewPager) findViewById(R.id.container);
-        recipeViewPager.setAdapter(recipeSectionsPagerAdapter);
-    }
+	private void requestData() {
+		RecipeService recipeService = RecipeApi.create();
+		Call<Recipes> recipeCall = recipeService.getTopRatedRecipes();
+		recipeCall.enqueue(new Callback<Recipes>() {
+			@Override
+			public void onResponse(Call<Recipes> call, Response<Recipes> response) {
+				// Voeg alle recepten toe aan lijst
+				recipes.addAll(Arrays.asList(response.body().recipes));
+				recipeSectionsPagerAdapter.notifyDataSetChanged();
+			}
 
-    private void requestData() {
-        RecipeService recipeService = RecipeService.retrofit.create(RecipeService.class);
-        Call<Recipe> recipeCall = recipeService.getTopRatedRecipes();
-        recipeCall.enqueue(new Callback<Recipe>() {
-            @Override
-            public void onResponse(Call<Recipe> call, Response<Recipe> response) {
-                Log.d("response", "onResponse: ", response);
-                //                ID pakken voor een tweede call?
-            }
+			@Override
+			public void onFailure(Call<Recipes> call, Throwable t) {
+				Log.i("yroo", "onFailure: ");
+				t.printStackTrace();
+			}
+		});
+	}
 
-            @Override
-            public void onFailure(Call<Recipe> call, Throwable t) {
-                Log.d("yroo", "onFailure: ");
-                t.printStackTrace();
-            }
-        });
-    }
+	public static class PlaceholderFragment extends Fragment {
+		private Recipe recipeData;
 
+		/**
+		 * The fragment argument representing the section number for this
+		 * fragment.
+		 */
+		private static final String ARG_RECIPE_NUMBER = "section_number";
+		ImageView imageView;
+		TextView recipeTitle;
 
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+		public PlaceholderFragment() {
+		}
 
-        public PlaceholderFragment() {
-        }
+		/**
+		 * Returns a new instance of this fragment for the given section
+		 * number.
+		 */
+		public static PlaceholderFragment newInstance(Recipe recipe) {
+			PlaceholderFragment fragment = new PlaceholderFragment();
+			Bundle args = new Bundle();
+			args.putParcelable(ARG_RECIPE_NUMBER, recipe);
+			fragment.setArguments(args);
+			return fragment;
+		}
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
+		@Override
+		public void onCreate(@Nullable Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			recipeData = getArguments().getParcelable(ARG_RECIPE_NUMBER);
+		}
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            ImageView imageView = rootView.findViewById(R.id.pictureOfRecipe);
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+								 Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+			imageView = rootView.findViewById(R.id.pictureOfRecipe);
+			recipeTitle = rootView.findViewById(R.id.titleOfRecipe);
+			recipeTitle.setText(recipeData.getTitle());
 
+			Glide.with(this)
+					.load(recipeData.getImageUrl())
+					.into(imageView);
+			return rootView;
+		}
+	}
 
-            //            imageView.setImageResource(recipes.get(getArguments().getInt(ARG_SECTION_NUMBER)).getImageRes());
-            Glide.with(context)
-                    .load("hier komt bestandsnaam")
-                    .into(imageView);
-            return rootView;
-        }
-    }
+	public class SectionsPagerAdapter extends FragmentPagerAdapter {
+		private List<Recipe> recipes;
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+		public SectionsPagerAdapter(FragmentManager fm, List<Recipe> recipes) {
+			super(fm);
+			this.recipes = recipes;
+		}
 
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
+		@Override
+		public Fragment getItem(int position) {
+			return PlaceholderFragment.newInstance(recipes.get(position));
+		}
 
-        @Override
-        public Fragment getItem(int position) {
-            return PlaceholderFragment.newInstance(position);
-        }
-
-        @Override
-        public int getCount() {
-            return recipes.size();
-        }
-    }
+		@Override
+		public int getCount() {
+			return recipes.size();
+		}
+	}
 }

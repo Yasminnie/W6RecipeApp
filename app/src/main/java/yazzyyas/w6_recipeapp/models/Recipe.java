@@ -1,96 +1,153 @@
 package yazzyyas.w6_recipeapp.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Recipe {
-    @SerializedName("publisher")
-    @Expose
-    private String publisher;
-    @SerializedName("f2f_url")
-    @Expose
-    private String f2fUrl;
-    @SerializedName("title")
-    @Expose
-    private String title;
-    @SerializedName("source_url")
-    @Expose
-    private String sourceUrl;
-    @SerializedName("recipe_id")
-    @Expose
-    private String recipeId;
-    @SerializedName("image_url")
-    @Expose
-    private String imageUrl;
-    @SerializedName("social_rank")
-    @Expose
-    private Float socialRank;
-    @SerializedName("publisher_url")
-    @Expose
-    private String publisherUrl;
+public class Recipe implements Parcelable {
 
-    public String getPublisher() {
-        return publisher;
-    }
+	@SerializedName("publisher")
+	@Expose
+	private String publisher;
+	@SerializedName("f2f_url")
+	@Expose
+	private String f2fUrl;
+	@SerializedName("title")
+	@Expose
+	private String title;
+	@SerializedName("source_url")
+	@Expose
+	private String sourceUrl;
+	@SerializedName("recipe_id")
+	@Expose
+	private String recipeId;
+	@SerializedName("image_url")
+	@Expose
+	private String imageUrl;
+	@SerializedName("social_rank")
+	@Expose
+	private Float socialRank;
+	@SerializedName("publisher_url")
+	@Expose
+	private String publisherUrl;
 
-    public void setPublisher(String publisher) {
-        this.publisher = publisher;
-    }
+	public Recipe(String title, String imageUrl) {
+		this.title = title;
+		this.imageUrl = imageUrl;
+	}
 
-    public String getF2fUrl() {
-        return f2fUrl;
-    }
+	protected Recipe(Parcel in) {
+		publisher = in.readString();
+		f2fUrl = in.readString();
+		title = in.readString();
+		sourceUrl = in.readString();
+		recipeId = in.readString();
+		imageUrl = in.readString();
+		if (in.readByte() == 0) {
+			socialRank = null;
+		} else {
+			socialRank = in.readFloat();
+		}
+		publisherUrl = in.readString();
+	}
 
-    public void setF2fUrl(String f2fUrl) {
-        this.f2fUrl = f2fUrl;
-    }
+	public static final Creator<Recipe> CREATOR = new Creator<Recipe>() {
+		@Override
+		public Recipe createFromParcel(Parcel in) {
+			return new Recipe(in);
+		}
 
-    public String getTitle() {
-        return title;
-    }
+		@Override
+		public Recipe[] newArray(int size) {
+			return new Recipe[size];
+		}
+	};
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public String getPublisher() {
+		return publisher;
+	}
 
-    public String getSourceUrl() {
-        return sourceUrl;
-    }
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
+	}
 
-    public void setSourceUrl(String sourceUrl) {
-        this.sourceUrl = sourceUrl;
-    }
+	public String getF2fUrl() {
+		return f2fUrl;
+	}
 
-    public String getRecipeId() {
-        return recipeId;
-    }
+	public void setF2fUrl(String f2fUrl) {
+		this.f2fUrl = f2fUrl;
+	}
 
-    public void setRecipeId(String recipeId) {
-        this.recipeId = recipeId;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+	public String getSourceUrl() {
+		return sourceUrl;
+	}
 
-    public Float getSocialRank() {
-        return socialRank;
-    }
+	public void setSourceUrl(String sourceUrl) {
+		this.sourceUrl = sourceUrl;
+	}
 
-    public void setSocialRank(Float socialRank) {
-        this.socialRank = socialRank;
-    }
+	public String getRecipeId() {
+		return recipeId;
+	}
 
-    public String getPublisherUrl() {
-        return publisherUrl;
-    }
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
 
-    public void setPublisherUrl(String publisherUrl) {
-        this.publisherUrl = publisherUrl;
-    }
+	public String getImageUrl() {
+		return imageUrl;
+	}
 
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
+	public Float getSocialRank() {
+		return socialRank;
+	}
+
+	public void setSocialRank(Float socialRank) {
+		this.socialRank = socialRank;
+	}
+
+	public String getPublisherUrl() {
+		return publisherUrl;
+	}
+
+	public void setPublisherUrl(String publisherUrl) {
+		this.publisherUrl = publisherUrl;
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(publisher);
+		dest.writeString(f2fUrl);
+		dest.writeString(title);
+		dest.writeString(sourceUrl);
+		dest.writeString(recipeId);
+		dest.writeString(imageUrl);
+		if (socialRank == null) {
+			dest.writeByte((byte) 0);
+		} else {
+			dest.writeByte((byte) 1);
+			dest.writeFloat(socialRank);
+		}
+		dest.writeString(publisherUrl);
+	}
 }
